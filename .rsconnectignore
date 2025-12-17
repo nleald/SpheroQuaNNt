@@ -1,0 +1,4 @@
+model.keras
+*.log
+*.zip
+*.csv
