@@ -100,6 +100,11 @@ calculate_feret <- function(mask_cimg, scale_factor = 1000 / 88.5002) {
   coords <- which(labeled_mat == biggest, arr.ind = TRUE)
   if (nrow(coords) < 2)
     return(list(Dmin = NA, Dmax = NA, Volume = NA, p1 = NULL, p2 = NULL))
+  max_points <- 1500
+  if (nrow(coords) > max_points) {
+    idx_sample <- seq(1, nrow(coords), length.out = max_points)
+    coords <- coords[round(idx_sample), ]
+  }
   
   dist_matrix <- as.matrix(dist(coords))
   dmax_val <- max(dist_matrix, na.rm = TRUE)
@@ -167,7 +172,7 @@ server <- function(input, output, session) {
   model_r <- shiny::reactiveVal(NULL)
   results <- shiny::reactiveVal(NULL)
   workdir <- shiny::reactiveVal(NULL)
-
+  
   
   observe({
     if (is.null(model_r())) {
@@ -207,13 +212,13 @@ server <- function(input, output, session) {
                                 "Error: CNN model cannot be loaded."))
     
     shiny::showNotification("Processing your image(s)", duration = 5)
-
+    
     scale_factor <- 1000 / input$px_per_1000um
     wdir <- tempfile("run_"); dir.create(wdir)
     mask_dir <- file.path(wdir, "Predicted_masks"); dir.create(mask_dir)
     overlay_dir <- file.path(wdir, "Predicted_overlays"); dir.create(overlay_dir)
     workdir(wdir)
-
+    
     li <- tryCatch(
       load_uploaded_images(input$imgs),
       error = function(e) {
@@ -223,9 +228,9 @@ server <- function(input, output, session) {
     if (is.null(li)) return(invisible(NULL))
     
     X <- li$images; fnames <- li$filenames
-
+    
     Xnp <- X 
-
+    
     preds_list <- list()
     
     if (Sys.info()[['sysname']] == "Windows") {
@@ -239,7 +244,7 @@ server <- function(input, output, session) {
       np <- import("numpy", convert = FALSE)
       
       for (i in 1:dim(Xnp)[1]) {
-  
+        
         single_image_batch <- Xnp[i, , , , drop = FALSE] 
         input_data <- np$array(single_image_batch, dtype = "float32")
         
@@ -250,7 +255,7 @@ server <- function(input, output, session) {
       }
     }    
     
-
+    
     preds <- do.call(abind::abind, c(preds_list, list(along = 1)))
     
     df <- data.frame(File = fnames, D_min_um = NA_real_,
