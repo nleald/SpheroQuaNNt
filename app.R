@@ -100,7 +100,7 @@ calculate_feret <- function(mask_cimg, scale_factor = 1000 / 88.5002) {
   coords <- which(labeled_mat == biggest, arr.ind = TRUE)
   if (nrow(coords) < 2)
     return(list(Dmin = NA, Dmax = NA, Volume = NA, p1 = NULL, p2 = NULL))
-  max_points <- 300
+  max_points <- 100
   if (nrow(coords) > max_points) {
     idx_sample <- seq(1, nrow(coords), length.out = max_points)
     coords <- coords[round(idx_sample), ]
@@ -352,4 +352,5 @@ server <- function(input, output, session) {
 }
 
 shiny::shinyApp(ui = ui, server = server)
+
 
