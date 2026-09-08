@@ -8,7 +8,7 @@ To run SpheroQuaNNt locally, you will need the application file and the trained 
 
 ### 1. Download the application
 
-Download the `app v2.R` file from this GitHub repository.
+Download the `App-v2.R` file from this GitHub repository.
 
 ### 2. Download the trained U-Net model
 
